@@ -123,7 +123,8 @@ for pp=pd
                     %calculate errorH1
                     uhx=0;xx=0;ux=0;
                     for aa = 1 : n_en
-                        uhx=uhx+u_ele(aa)*PolyShape(pp, aa, xi(i), 1);
+                        %actually,I don't konw wht adding 2*n_el
+                        uhx=uhx+2*n_el*u_ele(aa)*PolyShape(pp, aa, xi(i), 1);
                         xx=xx+x_ele(aa)*PolyShape(pp, aa, xi(i), 0);
                         ux=5* (xx.^4);
                     end
