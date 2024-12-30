@@ -1,0 +1,58 @@
+	%parameter
+R = 0.3;
+L = 1.0;
+
+	%The serial numbers of points ,lines, curve loops and surfaces are discussed separately
+
+	%creat the point
+Point(1) = {L, -L, 0};
+Point(2) = {L, L, 0};
+Point(3) = {-L, L, 0};
+Point(4) = {-L, -L, 0};
+Point(5) = {-L + R, -L, 0};
+Point(6) = {-L, -L + R, 0};
+Point(7) = {-L + Cos(Pi/4) * R, -L + Sin(Pi/4) * R, 0};
+
+	%an arc from point5 to point7 with center point4
+Circle(1) = {5, 4, 7};
+	%an arc from point7 to point6 with center point4
+Circle(2) = {7, 4, 6};
+
+	%an straight line from point(a) to point(b) for Line()={a,b}
+Line(3) = {6, 3};
+Line(4) = {3, 2};
+Line(5) = {2, 1};
+Line(6) = {1, 5};
+Line(7) = {2, 7};
+
+	%turn individual lines into closed curves——{4，7，2，3} representative Line(4), Line(7), Line(2) and Line(3); positive means clockwise
+Curve Loop(1) = {4, 7, 2, 3};
+	%create a plane from a closed curve——{1}  representative Curve Loop(1)
+Plane Surface(1) = {1};
+
+	%turn individual lines into closed curves——{7,-1,-6,-5} representative Line(7), Line(1), Line(6) and Line(5); negative means 	anticlockwise
+Curve Loop(2) = {7, -1, -6, -5};
+	%create a plane from a closed curve——{2}  representative Curve Loop(2)
+Plane Surface(2) = {2};
+
+	%create 3 nodes uniformly in these lines (including the nodes on the two end points)
+Transfinite Line{1, 2, 3, 4, 5, 6, 7} = 3;
+
+	% In the surface, uses a transfinite interpolation algorithm in the parametric plane of the surface to connect the nodes on the boundary 	using a structured grid. 生成超限网格
+	传统网格方法通常将计算区域划分为规则形状的网格单元，且每个单元具有相同的大小和形状。
+	%超限网格方法不限制网格单元的形状和大小，允许在计算区域中使用不规则形状的网格单元。
+	%When the surface has only 3 or 4 points on its boundary the list of corners can be omitted in the ‘Transfinite Surface’ constraint
+Transfinite Surface{1};
+Transfinite Surface{2};
+
+	%for Surface, create quadrangles instead of triangle element。将三角形网格合成为四边形网格
+Recombine Surface{1};
+Recombine Surface{2};
+
+	%set element order——1阶形函数
+Mesh.ElementOrder = 1;
+	%用于设置二维网格生成的算法选项
+	%8表示的是 Frontal-Delaunay algorithms，这种算法可以生成质量很高的四边形网格，特别适用于长宽比不同的矩形区域的划分。	
+Mesh.Algorithm = 8;
+
+// EOF
