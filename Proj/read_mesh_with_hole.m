@@ -38,8 +38,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==10
         flag=flag+1;
-        right_pos(flag,1)=BC(i,1);
-        right_pos(flag,2)=BC(i,2);
+        if flag==1
+            right_pos(flag,1)=x_coor( BC(i,1) );
+            right_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            right_pos(flag,1)=x_coor( BC(i,2) );
+            right_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            right_pos(flag,1)=x_coor( BC(i,2) );
+            right_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -48,8 +56,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==12
         flag=flag+1;
-        left_pos(flag,1)=BC(i,1);
-        left_pos(flag,2)=BC(i,2);
+        if flag==1
+            left_pos(flag,1)=x_coor( BC(i,1) );
+            left_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            left_pos(flag,1)=x_coor( BC(i,2) );
+            left_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            left_pos(flag,1)=x_coor( BC(i,2) );
+            left_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -58,8 +74,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==9
         flag=flag+1;
-        bottom_pos(flag,1)=BC(i,1);
-        bottom_pos(flag,2)=BC(i,2);
+        if flag==1
+            bottom_pos(flag,1)=x_coor( BC(i,1) );
+            bottom_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            bottom_pos(flag,1)=x_coor( BC(i,2) );
+            bottom_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            bottom_pos(flag,1)=x_coor( BC(i,2) );
+            bottom_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -68,8 +92,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==11
         flag=flag+1;
-        top_pos(flag,1)=BC(i,1);
-        top_pos(flag,2)=BC(i,2);
+        if flag==1
+            top_pos(flag,1)=x_coor( BC(i,1) );
+            top_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            top_pos(flag,1)=x_coor( BC(i,2) );
+            top_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            top_pos(flag,1)=x_coor( BC(i,2) );
+            top_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -78,7 +110,15 @@ flag=0;
 for i=1:a
     if BC(i,3)==8
         flag=flag+1;
-        circle_pos(flag,1)=BC(i,1);
-        circle_pos(flag,2)=BC(i,2);
+        if flag==1
+            circle_pos(flag,1)=x_coor( BC(i,1) );
+            circle_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            circle_pos(flag,1)=x_coor( BC(i,2) );
+            circle_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            circle_pos(flag,1)=x_coor( BC(i,2) );
+            circle_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end

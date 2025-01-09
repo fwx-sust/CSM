@@ -23,8 +23,8 @@ end
 
 %boundary position
 %5 for left, 6 for top, 7 for right, 8 for bottom
-BC=getfield(msh,'LINES');
-a=size(BC,1); %边界点个数
+BC=getfield(msh,'LINES'); %线的端点的A，有n条线段就有n+1个端点
+a=size(BC,1); %边界线段个数
 top_pos=[];
 bottom_pos=[];
 left_pos=[];
@@ -35,8 +35,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==7
         flag=flag+1;
-        right_pos(flag,1)=BC(i,1);
-        right_pos(flag,2)=BC(i,2);
+        if flag ==1 
+            right_pos(flag,1)= x_coor( BC(i,1) );
+            right_pos(flag,2)= y_coor( BC(i,1) );
+            flag=flag+1;
+            right_pos(flag,1)= x_coor( BC(i,2) );
+            right_pos(flag,2)= y_coor( BC(i,2) );
+        else
+            right_pos(flag,1)= x_coor( BC(i,2) );
+            right_pos(flag,2)= y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -45,8 +53,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==5
         flag=flag+1;
-        left_pos(flag,1)=BC(i,1);
-        left_pos(flag,2)=BC(i,2);
+        if flag==1
+            left_pos(flag,1)=x_coor( BC(i,1) );
+            left_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            left_pos(flag,1)=x_coor( BC(i,2) );
+            left_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            left_pos(flag,1)=x_coor( BC(i,2) );
+            left_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -55,8 +71,16 @@ flag=0;
 for i=1:a
     if BC(i,3)==8
         flag=flag+1;
-        bottom_pos(flag,1)=BC(i,1);
-        bottom_pos(flag,2)=BC(i,2);
+        if flag==1
+            bottom_pos(flag,1)=x_coor( BC(i,1) );
+            bottom_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            bottom_pos(flag,1)=x_coor( BC(i,2) );
+            bottom_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            bottom_pos(flag,1)=x_coor( BC(i,2) );
+            bottom_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
 
@@ -65,7 +89,15 @@ flag=0;
 for i=1:a
     if BC(i,3)==6
         flag=flag+1;
-        top_pos(flag,1)=BC(i,1);
-        top_pos(flag,2)=BC(i,2);
+        if flag==1
+            top_pos(flag,1)=x_coor( BC(i,1) );
+            top_pos(flag,2)=y_coor( BC(i,1) );
+            flag=flag+1;
+            top_pos(flag,1)=x_coor( BC(i,2) );
+            top_pos(flag,2)=y_coor( BC(i,2) );
+        else
+            top_pos(flag,1)=x_coor( BC(i,2) );
+            top_pos(flag,2)=y_coor( BC(i,2) );
+        end
     end
 end
