@@ -1,6 +1,6 @@
 // Gmsh project created on Wed Jan 08 21:15:36 2025
 R = 0.5;
-L = 4.0;
+L = 2.0;
 
 Point(1) = {L, -L, 0};
 Point(2) = {L, L, 0};
@@ -25,7 +25,7 @@ Plane Surface(1) = {1};
 Curve Loop(2) = {7, -1, -6, -5};
 Plane Surface(2) = {2};
 
-Transfinite Line{1, 2, 3, 4, 5, 6, 7} = 40 +1;
+Transfinite Line{1, 2, 3, 4, 5, 6, 7} = 20 +1;
 
 Transfinite Surface{1};
 Transfinite Surface{2};
@@ -47,3 +47,5 @@ Physical Curve("top", 11) = {4};
 Physical Curve("left", 12) = {3};
 //+
 Physical Curve("Oblique", 13) = {7};
+//+
+Physical Surface("surface", 14) = {1, 2};
