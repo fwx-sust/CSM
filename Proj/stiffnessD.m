@@ -7,6 +7,7 @@ else
     %stress
     if question_def == 2
         D=1/E *[1, -v, 0; -v, 1, 0; 0, 0, 2*(1+v)];
+        D=inv(D);
     else
         error("only for 1 and 2")
     end
