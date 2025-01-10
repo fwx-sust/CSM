@@ -9,12 +9,12 @@ f=@(x,y,dof) (dof==1)* (E/(1-v^2))*(x+y) +...
     (dof==2)*(E/(1-v^2))*(x-y);
 
 %exact solution
-fux=@(x,y) (1-v^2)/E *(-1/6)*(x^3+x*y^2);
-fuy=@(x,y) (1-v^2)/E *(-1/6)*(y^3-y*x^2);
+fux=@(x,y) 0.5*(1+v)/(1-v) *(x+y);
+fuy=@(x,y) 0.5*(1+v)/(1-v) *(x-y);
 
 %D(x)————specify either plane strain or plane stress
-question_def = 1; %1 for plane strain, 2 for plane stress
-D = stiffnessD(question_def, E, v);
+question_def = 2; %1 for plane strain, 2 for plane stress
+D0 = stiffnessD(question_def, E, v); %stress=D*strain
 
 % quadrature rule
 n_int_xi  = 3;
@@ -131,6 +131,7 @@ for ee = 1 : n_el
         x_l = 0.0; y_l = 0.0;
         dx_dxi = 0.0; dx_deta = 0.0;
         dy_dxi = 0.0; dy_deta = 0.0;
+        
         for aa = 1 : n_en
             x_l = x_l + x_ele(aa) * Quad(aa, xi(ll), eta(ll));
             y_l = y_l + y_ele(aa) * Quad(aa, xi(ll), eta(ll));
@@ -142,15 +143,18 @@ for ee = 1 : n_el
         end
 
         detJ = dx_dxi * dy_deta - dx_deta * dy_dxi;
+        D=weight(ll)*detJ*D0; %set up D~
 
         for aa = 1 : n_en
             Na = Quad(aa, xi(ll), eta(ll));
             [Na_xi, Na_eta] = Quad_grad(aa, xi(ll), eta(ll));
             Na_x = (Na_xi * dy_deta - Na_eta * dy_dxi) / detJ;
             Na_y = (-Na_xi * dx_deta + Na_eta * dx_dxi) / detJ;
-
+            
             Ba=[Na_x, 0; 0, Na_y; Na_y, Na_x];
-            kappa1=D*Ba;
+            DB=D*Ba;
+            % B1a=Na_x;B2a=Na_y;
+            % DB(1,1)=D(1,1)*B1a; DB(1,2)=D(1,2)*B2a; DB(2,1)=D(1,2)*B1a; DB(2,2)=D(2,2)*B2a; DB(3,1)=D(3,3)*B2a; DB(3,2)=D(3,3)*B1a;
 
             f_ele(2*aa-1) = f_ele(2*aa-1) + weight(ll) * detJ * f(x_l, y_l,1) * Na;
             f_ele(2*aa) = f_ele(2*aa) + weight(ll) * detJ * f(x_l, y_l,2) * Na;
@@ -160,11 +164,13 @@ for ee = 1 : n_el
                 Nb_x = (Nb_xi * dy_deta - Nb_eta * dy_dxi) / detJ;
                 Nb_y = (-Nb_xi * dx_deta + Nb_eta * dx_dxi) / detJ;
                 Bb=[Nb_x, 0; 0, Nb_y; Nb_y, Nb_x];
-                kappa=(Bb')*kappa1;
-                k_ele(2*aa-1,2*bb-1) = k_ele(2*aa-1,2*bb-1) + weight(ll) * detJ * kappa(1,1) * (Na_x * Nb_x + Na_y * Nb_y);
-                k_ele(2*aa-1,2*bb) = k_ele(2*aa-1,2*bb)+ weight(ll) * detJ * kappa(1,2) * (Na_x * Nb_x + Na_y * Nb_y);
-                k_ele(2*aa,2*bb-1) = k_ele(2*aa,2*bb-1)+ weight(ll) * detJ * kappa(2,1) * (Na_x * Nb_x + Na_y * Nb_y);
-                k_ele(2*aa,2*bb) = k_ele(2*aa,2*bb)+ weight(ll) * detJ * kappa(2,2) * (Na_x * Nb_x + Na_y * Nb_y);
+                BDB=(Bb')*DB;
+                % B1b=Nb_x; B2b=Nb_y;
+                % BDB(1,1)=B1b*DB(1,1)+B2b*DB(3,1); BDB(1,2)=B1b*DB(1,2)+B2b*DB(3,2); BDB(2,1)=B2b*DB(2,1)+B1b*DB(3,1); BDB(2,2)=B2b*DB(2,2)+B1b*DB(3,2);
+                k_ele(2*aa-1,2*bb-1) = k_ele(2*aa-1,2*bb-1) + weight(ll) * detJ * BDB(1,1) * (Na_x * Nb_x + Na_y * Nb_y);
+                k_ele(2*aa-1,2*bb) = k_ele(2*aa-1,2*bb)+ weight(ll) * detJ * BDB(1,2) * (Na_x * Nb_x + Na_y * Nb_y);
+                k_ele(2*aa,2*bb-1) = k_ele(2*aa,2*bb-1)+ weight(ll) * detJ * BDB(2,1) * (Na_x * Nb_x + Na_y * Nb_y);
+                k_ele(2*aa,2*bb) = k_ele(2*aa,2*bb)+ weight(ll) * detJ * BDB(2,2) * (Na_x * Nb_x + Na_y * Nb_y);
             end
         end
     end
@@ -182,6 +188,7 @@ for ee = 1 : n_el
                         K(PP, QQ) = K(PP, QQ) + k_ele(2*(aa-1)+i, 2*(bb-1)+i);
                     else %QQ=0
                         % modify F with the boundary data(Dirichlet条件)
+                        % 此时都为0，可以不用考虑
                         a=x_coor( IEN(ee,bb) );
                         b=y_coor( IEN(ee,bb) );
                         for j=1:size(top_pos,1)
@@ -224,7 +231,7 @@ for ii = 1 : n_np
         if index > 0
             disp(ii,i) = dn(index);
         else
-            % modify disp with the g data.
+            % modify disp with the g data.此时都为0
             a=x_coor( ii );
             b=y_coor( ii );
             for j=1:size(top_pos,1)
@@ -319,8 +326,8 @@ ylabel('y');
 %exact solution————上边界受拉力，下边界固定
 figure;
 
-x = linspace(0, 1, 50);
-y = linspace(0, 1, 50);
+x = linspace(min(x_plot), max(x_plot), 50);
+y = linspace(min(y_plot), max(y_plot), 50);
 [xq,yq]=meshgrid(x,y);
 uy = fuy(xq,yq);
 zq = griddata(x, y, uy, xq, yq, 'cubic'); % 使用三次插值
