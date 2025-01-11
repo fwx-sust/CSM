@@ -15,10 +15,20 @@ Da=E/(v+1)/(2*v-1);
 f=@(x,y,dof) (dof==1)*(-Da)*( 2*(v-1)*(y^2-y)-v*(2*x-1)*(2*y-1)+(2*v-1)*(x^2-x)+0.5*(2*v-1)*(2*x-1)*(2*y-1) ) +...
     (dof==2)*(-Da)*( 2*(v-1)*(x^2-x)-v*(2*y-1)*(2*x-1)+(2*v-1)*(y^2-y)+0.5*(2*v-1)*(2*y-1)*(2*x-1) ) ;
 
-%exact solution————（假设为二次位移场） 以下是最简单的两端固支的位移
-
+%exact solution————以下是最简单的两端固支的位移
+%位移理论值
 fux=@(x,y) x.*(x-1).*y.*(y-1); %点乘方便后续画图
 fuy=@(x,y) x.*(x-1).*y.*(y-1);
+%应变理论值
+f_strain_xx=@(x,y) (2.*x-1).*(y.^2-y);
+f_strain_yy=@(x,y) (x.^2-x).*(2.*y-1);
+f_strain_xy=@(x,y) 0.5*( (x.^2-x).*(2.*y-1)+(2.*x-1).*(y.^2-y) );
+f_strain_zz=@(x,y) -v/E *( Da*( (v-1).*(2.*x-1).*(y.^2-y)-v.*(x.^2-x).*(2.*y-1) )+ Da*( -v.*(2.*x-1).*(y.^2-y)+(v-1).*(x.^2-x).*(2.*y-1) ) ); %only for plane stress
+%应力理论值
+f_stress_xx=@(x,y) Da*( (v-1).*(2.*x-1).*(y.^2-y)-v.*(x.^2-x).*(2.*y-1) );
+f_stress_yy=@(x,y) Da*( -v.*(2.*x-1).*(y.^2-y)+(v-1).*(x.^2-x).*(2.*y-1) );
+f_stress_xy=@(x,y) Da*(2*v-1)*0.5.*( (x.^2-x).*(2.*y-1)+(2.*x-1).*(y.^2-y) );
+f_stress_zz=@(x,y) v*( Da*( (v-1).*(2.*x-1).*(y.^2-y)-v.*(x.^2-x).*(2.*y-1) )+Da*( -v.*(2.*x-1).*(y.^2-y)+(v-1).*(x.^2-x).*(2.*y-1) ) ); %only for plane strain
 
 % quadrature rule
 n_int_xi  = 3;
@@ -32,23 +42,6 @@ n_int     = n_int_xi * n_int_eta;
 [n_np,n_el,x_coor,y_coor,IEN,top_pos,bottom_pos,left_pos,right_pos] = try_to_read_mesh('rectangle_gmsh.m');
 n_en = 4;               % number of nodes in an element 四边形网格
 n_ed = 2;  %两个自由度
-
-%求单元面积
-area=zeros(n_el,1);
-area_s=zeros(n_el,1);
-for i=1:n_el
-    x1=x_coor( IEN(i,1) );
-    y1=y_coor( IEN(i,1) );
-    x2=x_coor( IEN(i,2) );
-    y2=y_coor( IEN(i,2) );
-    x3=x_coor( IEN(i,3) );
-    y3=y_coor( IEN(i,3) );
-    x4=x_coor( IEN(i,4) );
-    y4=y_coor( IEN(i,4) );
-    area(i)=0.5 * abs( x1*y2 + x2*y3 + x3*y4 + x4*y1 - (y1*x2 + y2*x3 + y3*x4 + y4*x1) );
-    area_s(i)=sqrt(area(i));
-end
-h=max(area_s);
 
 boundary_conditions=[0,0,0,0,0,0,0,0];
 
@@ -148,7 +141,7 @@ for ee = 1 : n_el
         end
 
         detJ = dx_dxi * dy_deta - dx_deta * dy_dxi;
-        
+
         %implement 2
         for aa = 1 : n_en
             Na = Quad(aa, xi(ll), eta(ll));
@@ -201,7 +194,6 @@ for ee = 1 : n_el
         end
     end
 end
-
 % solve the stiffness matrix
 %displacement
 dn = K \ F;
