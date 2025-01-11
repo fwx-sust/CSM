@@ -4,17 +4,21 @@ clear all; clc;
 
 E=2e11; %Young's modulus
 v=0.3; %Poisson's ratio
-%body force
-f=@(x,y,dof) (dof==1)* (E/(1-v^2))*(x+y) +...
-    (dof==2)*(E/(1-v^2))*(x-y);
-
-%exact solution
-fux=@(x,y) 0.5*(1+v)/(1-v) *(x+y);
-fuy=@(x,y) 0.5*(1+v)/(1-v) *(x-y);
 
 %D(x)————specify either plane strain or plane stress
-question_def = 2; %1 for plane strain, 2 for plane stress
+question_def = 1; %1 for plane strain, 2 for plane stress
 D0 = stiffnessD(question_def, E, v); %stress=D*strain
+
+%body force
+%只适用于plane strain，因为应变和应力的关系为plane strain提供的
+Da=E/(v+1)/(2*v-1);
+f=@(x,y,dof) (dof==1)*(-Da)*( (v-1)*2*(y^2-y) +(2*v-1)*(x^2-x)*2 ) +...
+    (dof==2)*(-Da)*( (2*v-1)*(2*x-1)*(2*y-1) );
+
+%exact solution————（假设为二次位移场） 以下是最简单的两端固支的位移
+
+fux=@(x,y) x.*(x-1).*y.*(y-1); %点乘方便后续画图
+fuy=@(x,y) 0;
 
 % quadrature rule
 n_int_xi  = 3;
@@ -176,12 +180,11 @@ for ee = 1 : n_el
     end
 
     %K and F
-
     for aa = 1 : n_en
         for i=1:2
             PP = LM(i,ee, aa);
             if PP > 0
-                F(PP) = F(PP) + f_ele(2*(aa-1)+i);
+                F(PP) = F(PP) + f_ele(2*(aa-1)+i); %p=2*(aa-1)+i q=2*(bb-1)+i
                 for bb = 1 : n_en
                     QQ = LM(i,ee, bb);
                     if QQ > 0
@@ -189,28 +192,28 @@ for ee = 1 : n_el
                     else %QQ=0
                         % modify F with the boundary data(Dirichlet条件)
                         % 此时都为0，可以不用考虑
-                        a=x_coor( IEN(ee,bb) );
-                        b=y_coor( IEN(ee,bb) );
-                        for j=1:size(top_pos,1)
-                            if a== top_pos(j,1) && b==top_pos(j,2)
-                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_top_f(a,b,i);
-                            end
-                        end
-                        for j=1:size(bottom_pos,1)
-                            if a== bottom_pos(j,1) && b==bottom_pos(j,2)
-                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_bottom_f(a,b,i);
-                            end
-                        end
-                        for j=1:size(left_pos,1)
-                            if a== left_pos(j,1) && b==left_pos(j,2)
-                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_left_f(a,b,i);
-                            end
-                        end
-                        for j=1:size(right_pos,1)
-                            if a== right_pos(j,1) && b==right_pos(j,2)
-                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_right_f(a,b,i);
-                            end
-                        end
+                        % a=x_coor( IEN(ee,bb) );
+                        % b=y_coor( IEN(ee,bb) );
+                        % for j=1:size(top_pos,1)
+                        %     if a== top_pos(j,1) && b==top_pos(j,2)
+                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_top_f(a,b,i);
+                        %     end
+                        % end
+                        % for j=1:size(bottom_pos,1)
+                        %     if a== bottom_pos(j,1) && b==bottom_pos(j,2)
+                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_bottom_f(a,b,i);
+                        %     end
+                        % end
+                        % for j=1:size(left_pos,1)
+                        %     if a== left_pos(j,1) && b==left_pos(j,2)
+                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_left_f(a,b,i);
+                        %     end
+                        % end
+                        % for j=1:size(right_pos,1)
+                        %     if a== right_pos(j,1) && b==right_pos(j,2)
+                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_right_f(a,b,i);
+                        %     end
+                        % end
                     end
                 end
             end
@@ -308,11 +311,10 @@ end
 
 %绘制displacement
 % 创建一个规则网格
-[xq, yq] = meshgrid(linspace(min(x_plot), max(x_plot), 100), ...
-    linspace(min(y_plot), max(y_plot), 100));
+[xq, yq] = meshgrid(linspace(min(x_plot), max(x_plot), 100),linspace(min(y_plot), max(y_plot), 100));
 
 % 使用 griddata 函数进行插值
-zq = griddata(x_plot, y_plot, uhy_plot, xq, yq, 'cubic'); % 使用三次插值
+zq = griddata(x_plot, y_plot, uhy_plot, xq, yq, 'cubic');
 
 % 绘制云图
 figure;
@@ -323,13 +325,41 @@ title('Contour Plot of Function uhy');
 xlabel('x');
 ylabel('y');
 
+%画的y
+figure;
+plot3(xq,yq,zq)
+xlabel("x轴")
+ylabel("y轴")
+zlabel("z轴")
+grid on
+
+figure;
+zq= griddata(x_plot, y_plot, uhx_plot, xq, yq, 'cubic');
+contourf(xq, yq, zq, 20, 'LineColor', 'none');
+colorbar; % 显示颜色条
+hold on;
+title('Contour Plot of Function uhx');
+xlabel('x');
+ylabel('y')
+
+
+%画的x
+figure;
+plot3(xq,yq,zq)
+xlabel("x轴")
+ylabel("y轴")
+zlabel("z轴")
+grid on
+
 %exact solution————上边界受拉力，下边界固定
 figure;
 
 x = linspace(min(x_plot), max(x_plot), 50);
-y = linspace(min(y_plot), max(y_plot), 50);
+y = linspace(min(x_plot), max(x_plot), 50);
 [xq,yq]=meshgrid(x,y);
-uy = fuy(xq,yq);
+uy=zeros(50,50); %和x,y所分份数有关
+uy(:,:)=fuy(xq,yq);
+
 zq = griddata(x, y, uy, xq, yq, 'cubic'); % 使用三次插值
 contourf(xq, yq, zq, 20, 'LineColor', 'none');
 colorbar; % 显示颜色条
@@ -339,7 +369,8 @@ xlabel('x');
 ylabel('y');
 
 figure;
-ux = fux(xq,yq);
+ux=zeros(50,50);
+ux(:,:)=fux(xq,yq);
 zq = griddata(x, y, ux, xq, yq, 'cubic'); % 使用三次插值
 contourf(xq, yq, zq, 20, 'LineColor', 'none');
 colorbar; % 显示颜色条
@@ -347,3 +378,12 @@ hold on;
 title('Contour Plot of Function ux');
 xlabel('x');
 ylabel('y');
+
+%绘制三维图像
+% 给定x、y、z的数值
+figure;
+plot3(xq,yq,zq)
+xlabel("x轴")
+ylabel("y轴")
+zlabel("z轴")
+grid on
