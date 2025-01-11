@@ -10,4 +10,4 @@
   3. vis_strain_for_square.m：应变可视化
   4. vis_stress_for_square.m：应力可视化
   5. error_for_square.m:计算error和他的convergence rates
-  6. 代码运行：运行drive——运行其他想看的程序。
+  6. 代码运行：运行drive——运行其他想看的程序。对于manufactured solution，则是运行test.m再运行其他程序。
