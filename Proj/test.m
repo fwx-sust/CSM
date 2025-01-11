@@ -2,7 +2,7 @@
 %只用来计算四边固支的情况，不可改变，只用来验证内部计算代码
 clear all; clc;
 
-E=2e11; %Young's modulus
+E=100; %Young's modulus
 v=0.3; %Poisson's ratio
 
 %D(x)————specify either plane strain or plane stress
@@ -119,7 +119,7 @@ for i=1:n_el
 end
 
 % allocate the stiffness matrix and load vector
-K = spalloc(n_eq, n_eq,n_eq^2 -2);
+K = spalloc(n_eq, n_eq,9*n_eq);
 F = zeros(n_eq, 1);
 
 % loop over element to assembly the matrix and vector
@@ -160,8 +160,8 @@ for ee = 1 : n_el
             % B1a=Na_x;B2a=Na_y;
             % DB(1,1)=D(1,1)*B1a; DB(1,2)=D(1,2)*B2a; DB(2,1)=D(1,2)*B1a; DB(2,2)=D(2,2)*B2a; DB(3,1)=D(3,3)*B2a; DB(3,2)=D(3,3)*B1a;
 
-            f_ele(2*aa-1) = f_ele(2*aa-1) + weight(ll) * detJ * f(x_l, y_l,1) * Na;
-            f_ele(2*aa) = f_ele(2*aa) + weight(ll) * detJ * f(x_l, y_l,2) * Na;
+            f_ele(2*aa-1) = f_ele(2*aa-1) + weight(ll) * detJ * f(x_l, y_l,1) * Na ;
+            f_ele(2*aa) = f_ele(2*aa) + weight(ll) * detJ * f(x_l, y_l,2) * Na ;
             for bb = 1 : aa
                 Nb = Quad(bb, xi(ll), eta(ll));
                 [Nb_xi, Nb_eta] = Quad_grad(bb, xi(ll), eta(ll));
@@ -178,6 +178,14 @@ for ee = 1 : n_el
             end
         end
     end
+    %让k_ele对称
+    k_ele_temp = k_ele-k_ele' ;
+    for i=1:8
+        for j=1:i
+            k_ele_temp(i,j)=0;
+        end
+    end
+    k_ele = k_ele - k_ele_temp;
 
     %K and F
     for aa = 1 : n_en
@@ -190,30 +198,30 @@ for ee = 1 : n_el
                     if QQ > 0
                         K(PP, QQ) = K(PP, QQ) + k_ele(2*(aa-1)+i, 2*(bb-1)+i);
                     else %QQ=0
-                        % modify F with the boundary data(Dirichlet条件)
-                        % 此时都为0，可以不用考虑
-                        % a=x_coor( IEN(ee,bb) );
-                        % b=y_coor( IEN(ee,bb) );
-                        % for j=1:size(top_pos,1)
-                        %     if a== top_pos(j,1) && b==top_pos(j,2)
-                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_top_f(a,b,i);
-                        %     end
-                        % end
-                        % for j=1:size(bottom_pos,1)
-                        %     if a== bottom_pos(j,1) && b==bottom_pos(j,2)
-                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_bottom_f(a,b,i);
-                        %     end
-                        % end
-                        % for j=1:size(left_pos,1)
-                        %     if a== left_pos(j,1) && b==left_pos(j,2)
-                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_left_f(a,b,i);
-                        %     end
-                        % end
-                        % for j=1:size(right_pos,1)
-                        %     if a== right_pos(j,1) && b==right_pos(j,2)
-                        %         F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_right_f(a,b,i);
-                        %     end
-                        % end
+                        %modify F with the boundary data(Dirichlet条件)
+                        %此时都为0，可以不用考虑
+                        a=x_coor( IEN(ee,bb) );
+                        b=y_coor( IEN(ee,bb) );
+                        for j=1:size(top_pos,1)
+                            if a== top_pos(j,1) && b==top_pos(j,2)
+                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_top_f(a,b,i);
+                            end
+                        end
+                        for j=1:size(bottom_pos,1)
+                            if a== bottom_pos(j,1) && b==bottom_pos(j,2)
+                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_bottom_f(a,b,i);
+                            end
+                        end
+                        for j=1:size(left_pos,1)
+                            if a== left_pos(j,1) && b==left_pos(j,2)
+                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_left_f(a,b,i);
+                            end
+                        end
+                        for j=1:size(right_pos,1)
+                            if a== right_pos(j,1) && b==right_pos(j,2)
+                                F(PP)= F(PP) - k_ele(2*(aa-1)+i, 2*(bb-1)+i)*disp_right_f(a,b,i);
+                            end
+                        end
                     end
                 end
             end
