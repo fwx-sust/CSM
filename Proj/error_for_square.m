@@ -285,6 +285,10 @@ B_x(1,:)=polyfit(log(hh),log(error1_x),1);
 xb=linspace(-5,-2,20);yb=B_x(1,1)*xb+B_x(1,2);
 plot(xb,yb,'-')
 
+title('error for x direction');
+xlabel('log(h)');
+ylabel('log(error)');
+
 %y方向
 figure()
 plot(log(hh),log(error0_y),'ro');
@@ -298,3 +302,7 @@ hold on
 B_y(1,:)=polyfit(log(hh),log(error1_y),1);
 xb=linspace(-5,-2,20);yb=B_y(1,1)*xb+B_y(1,2);
 plot(xb,yb,'-')
+
+title('error for y direction');
+xlabel('log(h)');
+ylabel('log(error)');
