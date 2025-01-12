@@ -18,6 +18,20 @@ for ee=1:n_el
         strain_yy=0;
         strain_xy=0;
         
+        dx_dxi = 0.0; dx_deta = 0.0;
+        dy_dxi = 0.0; dy_deta = 0.0;
+        for aa = 1 : n_en
+            x_l = x_l + x_ele(aa) * Quad(aa, xi(ll), eta(ll));
+            y_l = y_l + y_ele(aa) * Quad(aa, xi(ll), eta(ll));
+            [Na_xi, Na_eta] = Quad_grad(aa, xi(ll), eta(ll));
+            dx_dxi  = dx_dxi  + x_ele(aa) * Na_xi;
+            dx_deta = dx_deta + x_ele(aa) * Na_eta;
+            dy_dxi  = dy_dxi  + y_ele(aa) * Na_xi;
+            dy_deta = dy_deta + y_ele(aa) * Na_eta;
+        end
+
+        detJ = dx_dxi * dy_deta - dx_deta * dy_dxi;
+        
         for aa = 1 : n_en
 
             x=x+x_ele(aa)*Quad(aa, xi(qua), eta(qua));
