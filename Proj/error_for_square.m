@@ -217,10 +217,10 @@ for n_el_x = n_el_x0              % number of elements in x-dir
             end
         end
 
-        fenzi0_x=0;
-        fenzi1_x=0;
-        fenzi0_y=0;
-        fenzi1_y=0;
+        fenzi0_x=0; fenmu0_x=0;
+        fenzi1_x=0; fenmu1_x=0;
+        fenzi0_y=0; fenmu0_y=0;
+        fenzi1_y=0; fenmu1_y=0;
         for ee=1:n_el
             x_ele = x_coor( IEN(ee, 1:n_en) );
             y_ele = y_coor( IEN(ee, 1:n_en) );
@@ -253,6 +253,7 @@ for n_el_x = n_el_x0              % number of elements in x-dir
                     uy_y=fuy_y(x,y);
                 end
                 fenzi0_x= fenzi0_x+detJ*weight(qua)*(uhx-ux)^2;
+                fenmu0_x=
                 fenzi0_y= fenzi0_y+detJ*weight(qua)*(uhy-uy)^2;
 
                 fenzi1_x= fenzi1_x+ detJ*weight(qua)*( (uhx-ux)^2 + (uhx_x -ux_x)^2 + (uhx_y -ux_y)^2 );

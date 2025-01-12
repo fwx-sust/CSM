@@ -4,7 +4,7 @@ Mesh.Algorithm = 5;
 
 mesh_edge=40;
 //+
-Point(1) = {0, -0, 0};
+Point(1) = {0, 0, 0};
 //+
 Point(2) = {1, 0, 0};
 //+
