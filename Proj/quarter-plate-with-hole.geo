@@ -2,13 +2,13 @@
 R = 0.5;
 L = 2.0;
 
-Point(1) = {L, -L, 0};
+Point(1) = {L, 0, 0};
 Point(2) = {L, L, 0};
-Point(3) = {-L, L, 0};
-Point(4) = {-L, -L, 0};
-Point(5) = {-L + R, -L, 0};
-Point(6) = {-L, -L + R, 0};
-Point(7) = {-L + Cos(Pi/4) * R, -L + Sin(Pi/4) * R, 0};
+Point(3) = {0, L, 0};
+Point(4) = {0, 0, 0};
+Point(5) = {R, 0, 0};
+Point(6) = {0, R, 0};
+Point(7) = { Cos(Pi/4) * R,  Sin(Pi/4) * R, 0};
 
 Circle(1) = {5, 4, 7};
 Circle(2) = {7, 4, 6};
